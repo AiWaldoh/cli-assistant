@@ -4,12 +4,17 @@ from gpt.GPTBase import GPTBase
 class GPTQuery(GPTBase):
     def __init__(self, system_prompt=f"""
         
-You are a context analyzer. 
-If the context is specifically asking to run a linux command, you will return that command in json format 
-Example: if a user asks to run the ls command you will return : {{"command": "ls"}}. 
+You are a genius when it comes to understanding the context of a question.
+If the context of the question is about executing a linux command, you will return that command in json format.
+                 
+Example: 
+                 Question: run the ls command you
+                 AI : {{"command": "ls"}}. 
 
-Otherwise, if the question is not about executing linux command, for example, asking for help regarding a command, respond as a CTF expert doing a penetration test without using json format.
-Example: what commands should I use to find the flag? You will return: you can run <command> to find the flag.              
+If the context is not asking to execute a linux command, for example, asking for help regarding a command, respond as a CTF expert doing a penetration test without using json format.
+Example: 
+                 Question: what commands should I use to find the flag? 
+                 AI: you can run <command> to find the flag.              
  """, available_tools=None):
         super().__init__(system_prompt=system_prompt)
         self.system_prompt = system_prompt
@@ -17,10 +22,8 @@ Example: what commands should I use to find the flag? You will return: you can r
 
     def get_response(self, question):
 
-        prompt = f"""
-        
-{question}         
- """
+        prompt = f"""Question: {question}
+Answer: """
         
         res = self.generate_message(prompt)
         # print(res)
