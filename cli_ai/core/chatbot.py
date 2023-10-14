@@ -9,7 +9,7 @@ class ChatbotHandler:
     def ask_chatbot_for_command(self, command):
         prompt_template = f"""
                     Given the following user cli input that is directed to a cli AI : {command} 
-                    Determine if the user is asking for a command to be executed or asking for help regarding a command. If neither, respond with a helpful message.
+                    Determine if the message is giving directives for a command to be executed or asking for help regarding a command. If neither, respond with a helpful message.
 
                     Example command JSON response:
                     {{

@@ -118,10 +118,36 @@ class CLIExecutor:
         except Exception as e:
             print(f"Error: {e}")
 
+    @staticmethod
+    def check_openvpn_success(command):
+        success_phrase = "Initialization Sequence Completed"
+        timeout = 15
+        process = subprocess.Popen(
+            command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
+        )
+        start_time = time.time()
+
+        try:
+            while time.time() - start_time < timeout:
+                line = process.stdout.readline()
+                if success_phrase in line:
+                    print(
+                        f"{CLIView.Color.GREEN}openvpn connection successful{CLIView.Color.END}"
+                    )
+                    return
+        except KeyboardInterrupt:
+            pass
+
+        print("Connection timed out after 15 seconds.")
+
     def execute(
         self, command, from_ai=False
     ):  # Add a flag to indicate if the command comes from the AI
-        if command.startswith(("mkdir", "rm", "touch", "cp", "mv", "ping", "apt-get")):
+        if command.startswith(("mkdir", "rm", "touch", "cp", "mv", "apt-get")):
             print(command)
             self.run_subprocess(command)
         elif command.strip() == "ls":
@@ -132,9 +158,9 @@ class CLIExecutor:
             )
             self.handle_cd_command(target_dir)
         elif command.startswith("ping"):
-            CLIView.run_command_streaming_output(command)
+            CLIView.run_ping_streaming_output(command)
         elif command.startswith("openvpn"):
-            pass
+            self.check_openvpn_success(command)
         elif not from_ai:  # Only ask the AI if the command wasn't already from the AI
             response, is_command = self.chatbot_handler.ask_chatbot_for_command(command)
 
