@@ -1,8 +1,5 @@
 import openai
-import os
-from dotenv import load_dotenv
 
-load_dotenv()
 default_system_message = "You are a helpful assistant."
 
 
@@ -21,8 +18,6 @@ class ChatGPTWrapper:
             ],
             temperature=temperature,
         )
-        # print(messages)
-        # print("in chatgptwrapper2")
         self.history.append({"role": "user", "content": prompt})
         self.history.append(
             {"role": "assistant", "content": response.choices[0].message["content"]}
