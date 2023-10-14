@@ -2,13 +2,25 @@ import os
 import subprocess
 import time
 import json
-from gpt.GPTQuery import GPTQuery
-
+# from gpt.GPTQuery import GPTQuery
+from gpt.ChatGPTWrapper import ChatGPTWrapper
 from dotenv import load_dotenv
-
 load_dotenv()
-gpt_query = GPTQuery()
 
+system_message = """You are a genius when it comes to understanding the context of a question.
+                If the context of the question is about running a linux command, you will return that command in json format.
+
+                Example: 
+                Question: run the ls command
+                AI : {{"command": "ls"}}. 
+
+                If the context is not asking to run a linux command, for example, asking for help regarding a command, respond as a CTF expert doing a penetration test without using json format.
+                Example: 
+                Question: what commands should I use to find the flag? 
+                AI: you can run <command> to find the flag.     
+                """
+api_key = os.getenv("OPENAI_API_KEY")
+gpt_query = ChatGPTWrapper(api_key, system_message=system_message)
 class Color:
     RED = '\033[91m'
     GREEN = '\033[92m'
@@ -138,7 +150,7 @@ def execute(command):
         return
 
     # If the command isn't predefined, pass it to the AI:
-    response = gpt_query.get_response(command)
+    response = gpt_query.ask_chatbot(command, temperature=0)
     # print(response)  # This is for debugging, can be removed later
     try:
         data = json.loads(response)
@@ -167,6 +179,9 @@ def process_command(command):
 
 
 def main():
+
+    
+
     while True:
         try:
 
