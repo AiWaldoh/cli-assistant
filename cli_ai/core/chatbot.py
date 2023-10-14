@@ -7,12 +7,38 @@ class ChatbotHandler:
         self.gpt_query = ChatGPTWrapper(api_key, system_message=system_message)
 
     def ask_chatbot_for_command(self, command):
-        response = self.gpt_query.ask_chatbot(command, temperature=0)
+        prompt_template = f"""
+                    Given the following user cli input that is directed to a cli AI : {command} 
+                    Determine if the user is asking for a command to be executed or asking for help regarding a command. If neither, respond with a helpful message.
+
+                    Example command JSON response:
+                    {{
+                        "result": {{
+                            "message_type": "command",
+                            "explanation": "<explanation of command>"
+                            "reply": "<linux command>"
+                        }},
+                    }}
+
+                    Example question JSON response:
+                    {{
+                        "result": {{
+                            "message_type": "normal",
+                            "explanation": "<explanation of message>"
+                            "reply": "<helpful response>"
+                        }},
+                    }}
+
+                """
+        response = self.gpt_query.ask_chatbot(prompt_template)
+        # print(response)
         try:
             data = json.loads(response)
-            if "command" in data:
-                return data["command"], True
+            # print(data)
+            res = data["result"]
+            if res.get("message_type") == "command":
+                return data, True
             else:
-                return data["response"], False
+                return res["reply"], False
         except json.JSONDecodeError:
             return response, False

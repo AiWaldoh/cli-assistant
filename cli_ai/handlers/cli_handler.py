@@ -1,8 +1,9 @@
 import os
 import subprocess
+import time
 
 
-class CLIHandler:
+class CLIView:
     class Color:
         RED = "\033[91m"
         GREEN = "\033[92m"
@@ -13,27 +14,16 @@ class CLIHandler:
         WHITE = "\033[97m"
         END = "\033[0m"
 
-    def __init__(self, chatbot_handler):
-        self.chatbot_handler = chatbot_handler
-        self.command_handlers = {
-            "mkdir": self.run_subprocess,
-            "rm": self.run_subprocess,
-            "touch": self.run_subprocess,
-            "cp": self.run_subprocess,
-            "mv": self.run_subprocess,
-            "ping": self.run_subprocess_with_stream,
-            "apt-get": self.run_subprocess,
-            "ls": self.enhanced_ls,
-            "cd": self.handle_cd_command
-            # ... add other commands and their handlers here
-        }
-
-    def get_custom_prompt(self):
+    @staticmethod
+    def get_custom_prompt():
         username = os.getenv("USER") or os.getenv("USERNAME")
         pwd = os.getcwd()
-        return f"{self.Color.CYAN}[{self.Color.GREEN}{username}{self.Color.END}@python-cli {self.Color.MAGENTA}{pwd}{self.Color.CYAN}]{self.Color.END}$ "
+        return f"{CLIView.Color.CYAN}[{CLIView.Color.GREEN}{username}{CLIView.Color.END}@python-cli {CLIView.Color.MAGENTA}{pwd}{CLIView.Color.CYAN}]{CLIView.Color.END}$ "
 
-    def run_subprocess(self, command):
+    @staticmethod
+    def check_openvpn_success(command):
+        success_phrase = "Initialization Sequence Completed"
+        timeout = 15
         process = subprocess.Popen(
             command,
             shell=True,
@@ -41,14 +31,24 @@ class CLIHandler:
             stderr=subprocess.PIPE,
             text=True,
         )
-        stdout, stderr = process.communicate()
-        if stdout:
-            print(stdout.strip())
-        if stderr:
-            print(f"{self.Color.RED}{stderr.strip()}{self.Color.END}")
+        start_time = time.time()
 
-    def run_subprocess_with_stream(self, command):
-        print(f"Running command: {command}")
+        try:
+            while time.time() - start_time < timeout:
+                line = process.stdout.readline()
+                if success_phrase in line:
+                    print(
+                        f"{CLIView.Color.GREEN}openvpn connection successful{CLIView.Color.END}"
+                    )
+                    return
+        except KeyboardInterrupt:
+            pass
+
+        print("Connection timed out after 15 seconds.")
+
+    @staticmethod
+    def run_ping_streaming_output(command):
+        print(f"Running ping command: {command}")
         process = subprocess.Popen(
             command,
             shell=True,
@@ -68,9 +68,10 @@ class CLIHandler:
         # Print any remaining output after the command finishes
         _, stderr = process.communicate()
         if stderr:
-            print(f"{self.Color.RED}{stderr.strip()}{self.Color.END}")
+            print(f"{CLIView.Color.RED}{stderr.strip()}{CLIView.Color.END}")
 
-    def enhanced_ls(self, command=None):
+    @staticmethod
+    def enhanced_ls():
         try:
             result = subprocess.run(
                 "ls -lah", shell=True, capture_output=True, text=True
@@ -80,34 +81,70 @@ class CLIHandler:
                 if len(parts) > 8:
                     filename = parts[-1]
                     if line.startswith("d"):
-                        print(f"{self.Color.BLUE}{line}{self.Color.END}")
+                        print(f"{CLIView.Color.BLUE}{line}{CLIView.Color.END}")
                     elif filename.startswith("."):
-                        print(f"{self.Color.CYAN}{line}{self.Color.END}")
+                        print(f"{CLIView.Color.CYAN}{line}{CLIView.Color.END}")
                     else:
-                        print(f"{self.Color.WHITE}{line}{self.Color.END}")
+                        print(f"{CLIView.Color.WHITE}{line}{CLIView.Color.END}")
         except Exception as e:
-            print(f"{self.Color.RED}Error: {e}{self.Color.END}")
+            print(f"{CLIView.Color.RED}Error: {e}{CLIView.Color.END}")
 
-    def handle_cd_command(self, command):
-        target_dir = (
-            command.split()[1] if len(command.split()) > 1 else os.getenv("HOME")
+
+class CLIExecutor:
+    def __init__(self, chatbot_handler):
+        self.chatbot_handler = chatbot_handler
+
+    def run_subprocess(self, command, stream=False):
+        process = subprocess.Popen(
+            command,
+            shell=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            text=True,
         )
+        stdout, stderr = process.communicate()
+        if stream:
+            for line in stdout.splitlines():
+                print(line.strip())
+        else:
+            if stdout:
+                print(stdout.strip())
+            if stderr:
+                print(f"{CLIView.Color.RED}{stderr.strip()}{CLIView.Color.END}")
+
+    def handle_cd_command(self, target_dir):
         try:
             os.chdir(target_dir)
         except Exception as e:
             print(f"Error: {e}")
 
-    def execute(self, command):
-        cmd_key = command.split()[0]
-        handler = self.command_handlers.get(cmd_key)
-
-        if handler:
-            handler(command)
-        elif cmd_key == "openvpn":
+    def execute(
+        self, command, from_ai=False
+    ):  # Add a flag to indicate if the command comes from the AI
+        if command.startswith(("mkdir", "rm", "touch", "cp", "mv", "ping", "apt-get")):
+            print(command)
+            self.run_subprocess(command)
+        elif command.strip() == "ls":
+            CLIView.enhanced_ls()
+        elif command.split()[0] == "cd":
+            target_dir = (
+                command.split()[1] if len(command.split()) > 1 else os.getenv("HOME")
+            )
+            self.handle_cd_command(target_dir)
+        elif command.startswith("ping"):
+            CLIView.run_command_streaming_output(command)
+        elif command.startswith("openvpn"):
             pass
-        else:
+        elif not from_ai:  # Only ask the AI if the command wasn't already from the AI
             response, is_command = self.chatbot_handler.ask_chatbot_for_command(command)
+
             if is_command:
-                self.execute(response)
+                res = response["result"]
+                self.execute(
+                    res["reply"], from_ai=True
+                )  # Set the flag to True when executing a command from the AI
             else:
-                print(f"{self.Color.MAGENTA}{response}{self.Color.END}")
+                print(f"{CLIView.Color.MAGENTA}{response}{CLIView.Color.END}")
+        else:
+            # If the command comes from the AI and isn't explicitly handled, just execute it
+            self.run_subprocess(command)
