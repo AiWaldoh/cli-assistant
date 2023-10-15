@@ -22,6 +22,7 @@ class CLIView:
 
     @staticmethod
     def check_openvpn_success(command):
+        command += " &"
         success_phrase = "Initialization Sequence Completed"
         timeout = 15
         process = subprocess.Popen(
@@ -57,6 +58,8 @@ class CLIView:
             text=True,
         )
 
+        start_time = time.time()  # Record the start time
+
         # Stream output in real-time
         while True:
             output = process.stdout.readline()
@@ -64,6 +67,14 @@ class CLIView:
                 break
             if output:
                 print(output.strip())
+
+            # Check if 5 seconds have passed
+            if time.time() - start_time > 5:
+                print(
+                    f"{CLIView.Color.YELLOW}Ping command terminated after 5 seconds.{CLIView.Color.END}"
+                )
+                process.terminate()  # Terminate the ping command
+                return
 
         # Print any remaining output after the command finishes
         _, stderr = process.communicate()
@@ -105,7 +116,7 @@ class CLIExecutor:
         stdout, stderr = process.communicate()
         if stream:
             for line in stdout.splitlines():
-                print(line.strip())
+                print(f"{CLIView.Color.GREEN}{line.strip()}{CLIView.Color.END}")
         else:
             if stdout:
                 print(stdout.strip())
@@ -134,6 +145,7 @@ class CLIExecutor:
         try:
             while time.time() - start_time < timeout:
                 line = process.stdout.readline()
+                print(line)
                 if success_phrase in line:
                     print(
                         f"{CLIView.Color.GREEN}openvpn connection successful{CLIView.Color.END}"

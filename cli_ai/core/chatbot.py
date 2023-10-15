@@ -15,7 +15,7 @@ class ChatbotHandler:
                     {{
                         "result": {{
                             "message_type": "command",
-                            "explanation": "<explanation of command>"
+                            "explanation": "<explanation of what the command will do>"
                             "reply": "<linux command>"
                         }},
                     }}
