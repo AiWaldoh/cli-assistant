@@ -28,8 +28,9 @@ class ChatbotHandler:
         # print(decision_response)
         return json.loads(decision_response)
 
-    def ask_chatbot_for_command(self, command, system_prompt=SYSTEM_MESSAGE, prompt_template=""):
-        
+    def ask_chatbot_for_command(
+        self, command, system_prompt=SYSTEM_MESSAGE, prompt_template=""
+    ):
         response = self.gpt_query.ask_chatbot(
             prompt_template,
             system_message=system_prompt,

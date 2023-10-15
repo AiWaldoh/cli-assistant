@@ -132,7 +132,7 @@ class CLIExecutor:
                 print("is haha")
                 response, is_command = self.chatbot_handler.ask_chatbot_for_command(
                     command,
-                    "You Answer as a QA Chatbot",
+                    system_prompt="You Answer as a QA Chatbot",
                     prompt_template=context_string,
                 )
             else:
