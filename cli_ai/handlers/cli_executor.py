@@ -51,7 +51,7 @@ class CLIExecutor:
         try:
             while time.time() - start_time < timeout:
                 line = process.stdout.readline()
-                print(line)
+                # print(line)
                 if success_phrase in line:
                     print(
                         f"{CLIView.Color.GREEN}openvpn connection successful{CLIView.Color.END}"
@@ -65,10 +65,12 @@ class CLIExecutor:
     def execute(
         self, command, from_ai=False
     ):  # Add a flag to indicate if the command comes from the AI
-        gpt_response = self.chatbot_handler.needs_context(command)
-        print(f"""GPT response: {gpt_response["answer"]}""")
+        gpt_response = False
+        if command.startswith("h "):  # or not from_ai:
+            gpt_response = True  # self.chatbot_handler.needs_context(command)
+            # print(f"""Router decision [add history]: {gpt_response}""")
         is_haha = False
-        if str(gpt_response["answer"]) == "yes":
+        if gpt_response:
             last_user_message = self.chatbot_handler.gpt_query.history[-2]["content"]
             is_haha = True
             # Parsing the AI's response to extract only the 'reply' key

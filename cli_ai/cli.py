@@ -29,3 +29,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+# todo make follow up questions start with !f for example instead of using ai router

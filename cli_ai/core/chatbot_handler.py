@@ -18,7 +18,7 @@ class ChatbotHandler:
 
     def needs_context(self, user_message):
         decision_prompt = f"""Given the user message '{user_message}' from an ongoing conversation, does this message require the previous message from this conversation to be understood? You must answer in valid json.
-        
+        *Note: Remember that if message asking to execute a linux command, you must answer no.
         Example JSON reply: {{"answer:": ""<yes or no>"", "explanation": "<explanation of why>"}}"""
 
         # print(decision_prompt)

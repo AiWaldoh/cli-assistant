@@ -22,7 +22,7 @@ class ChatGPTWrapper:
             ],
             temperature=temperature,
         )
-        print(response)
+        # print(response)
         if history:
             # Save the original command if provided
             if original_command:
