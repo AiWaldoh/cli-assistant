@@ -1,7 +1,8 @@
 import os
 from dotenv import load_dotenv
 from cli_ai.core.chatbot import ChatbotHandler
-from cli_ai.handlers.cli_handler import CLIExecutor, CLIView
+from cli_ai.handlers.cli_executor import CLIExecutor
+from cli_ai.handlers.cli_view import CLIView
 
 load_dotenv()
 
