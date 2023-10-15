@@ -9,7 +9,7 @@ load_dotenv()
 
 def main():
     api_key = os.getenv("OPENAI_API_KEY")
-    
+
     chatbot = ChatbotHandler(api_key)
     cli_executor = CLIExecutor(
         chatbot
