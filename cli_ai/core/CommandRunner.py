@@ -31,6 +31,14 @@ class CommandRunner(BaseCommandRunner):
         self.chatbot_handler = ChatbotHandler()  # Initialize your ChatbotHandler here.
 
     def execute(self, command_input, is_from_ai=False):
+        if command_input.startswith("h "):
+            response, new_is_from_ai = self.chatbot_handler.answer_from_context(
+                command_input
+            )
+            print(response)
+            # self.execute(response, is_from_ai=new_is_from_ai)
+            return
+
         # Skip AI check if the command is from AI or if it's a registered or whitelisted command
         if (
             is_from_ai

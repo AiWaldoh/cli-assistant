@@ -1,7 +1,7 @@
 import openai
 
 
-class ChatGPTWrapper:
+class ChatGPTBase:
     def __init__(self, api_key):
         openai.api_key = api_key
         self.history = []
