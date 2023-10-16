@@ -32,6 +32,8 @@ class CommandRunner(BaseCommandRunner):
         self.chatbot_handler = ChatbotHandler()  # Initialize your ChatbotHandler here.
 
     def execute(self, command_input, is_from_ai=False):
+        # print(f"message: {command_input}")
+        # print(f"is_from_ai: {is_from_ai}")
         if command_input.startswith("h "):
             response, new_is_from_ai = self.chatbot_handler.answer_from_context(
                 command_input
@@ -52,6 +54,7 @@ class CommandRunner(BaseCommandRunner):
                 command_input
             )
             if is_command:
+                print(response["result"]["reply"])
                 self.execute(response["result"]["reply"], is_from_ai=True)
                 return
             else:
