@@ -217,6 +217,17 @@ python-versions = ">=2.7, !=3.0.*, !=3.1.*, !=3.2.*, !=3.3.*"
 dev = ["pre-commit", "tox"]
 
 [[package]]
+name = "prompt-toolkit"
+version = "3.0.39"
+description = "Library for building powerful interactive command lines in Python"
+category = "main"
+optional = false
+python-versions = ">=3.7.0"
+
+[package.dependencies]
+wcwidth = "*"
+
+[[package]]
 name = "py"
 version = "1.11.0"
 description = "library with cross-python path, ini-parsing, io, code, log facilities"
@@ -326,7 +337,7 @@ zstd = ["zstandard (>=0.18.0)"]
 name = "wcwidth"
 version = "0.2.8"
 description = "Measures the displayed width of unicode strings in a terminal"
-category = "dev"
+category = "main"
 optional = false
 python-versions = "*"
 
@@ -345,7 +356,7 @@ multidict = ">=4.0"
 [metadata]
 lock-version = "1.1"
 python-versions = "^3.10"
-content-hash = "fc521c00bc98d9d0cebe9883b6b6d95a33826f1de787fbb0a7d9a13a227aba36"
+content-hash = "a93924991b3ef6b9037366ffe810092716b81c9572364c4dc3d1b88ca817d45b"
 
 [metadata.files]
 aiohttp = []
@@ -368,6 +379,7 @@ packaging = []
 pathspec = []
 platformdirs = []
 pluggy = []
+prompt-toolkit = []
 py = []
 pytest = []
 python-dotenv = []

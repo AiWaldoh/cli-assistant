@@ -8,6 +8,7 @@ authors = ["Your Name <you@example.com>"]
 python = "^3.10"
 python-dotenv = "^1.0.0"
 openai = "^0.28.1"
+prompt-toolkit = "^3.0.39"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
