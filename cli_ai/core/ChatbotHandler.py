@@ -68,7 +68,7 @@ class ChatbotHandler:
         )
         try:
             data = json.loads(response)
-            print(data)
+            # print(data)
             res = data["result"]
             if res.get("message_type") == "command":
                 return data, True

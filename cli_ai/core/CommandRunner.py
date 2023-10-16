@@ -4,6 +4,7 @@ import time
 from core.Color import Color
 from core.BaseCommandRunner import BaseCommandRunner
 from core.ChatbotHandler import ChatbotHandler
+from core.OutputFormatter import OutputFormatter
 
 # global registry hack for now
 command_registry = {}
@@ -54,9 +55,7 @@ class CommandRunner(BaseCommandRunner):
                 self.execute(response["result"]["reply"], is_from_ai=True)
                 return
             else:
-                print(
-                    f"AI says: {response}"
-                )  # Output the AI's message if it's not a command
+                print(OutputFormatter.ai_response(response))
                 return
 
         # Check against registered commands

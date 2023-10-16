@@ -14,6 +14,10 @@ class OutputFormatter:
     def success(text):
         return f"{Color.GREEN}{text}{Color.END}"
 
+    @staticmethod
+    def ai_response(text):
+        return f"{Color.MAGENTA}{text}{Color.END}"
+
     def get_custom_prompt():
         username = os.getenv("USER") or os.getenv("USERNAME")
         pwd = os.getcwd()
