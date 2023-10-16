@@ -3,6 +3,7 @@ import os
 import time
 from core.Color import Color
 from core.BaseCommandRunner import BaseCommandRunner
+from core.ChatbotHandler import ChatbotHandler
 
 # global registry hack for now
 command_registry = {}
@@ -19,21 +20,56 @@ def register(command):
 class CommandRunner(BaseCommandRunner):
     def __init__(self):
         super().__init__()
+        self.whitelist = [
+            "mkdir",
+            "rmdir",
+            "rm",
+            "touch",
+            "cp",
+            "mv",
+        ]  # Add commands you want to whitelist here.
+        self.chatbot_handler = ChatbotHandler()  # Initialize your ChatbotHandler here.
 
-    def execute(self, command_input):
-        # First, try to find the command in the registry.
+    def execute(self, command_input, is_from_ai=False):
+        # Skip AI check if the command is from AI or if it's a registered or whitelisted command
+        if (
+            is_from_ai
+            or self.is_registered_command(command_input)
+            or self.is_whitelisted_command(command_input)
+        ):
+            pass
+        else:
+            response, is_command = self.chatbot_handler.answer_or_execute_command(
+                command_input
+            )
+            if is_command:
+                self.execute(response["result"]["reply"], is_from_ai=True)
+                return
+            else:
+                print(
+                    f"AI says: {response}"
+                )  # Output the AI's message if it's not a command
+                return
+
+        # Check against registered commands
         for command, func in command_registry.items():
             if command_input.startswith(command):
                 func(self, command_input)
-                return  # Return early if the command is found and executed.
+                return
 
-        # If no registered command matches, run the generic command.
-        try:
+        # Check for whitelisted commands
+        if self.is_whitelisted_command(command_input):
             self.run_generic_command(command_input, stream=True, timeout=15)
-        except KeyboardInterrupt:
             return
-        except Exception as e:
-            print(f"Error occurred: {e}")
+
+        # If neither registered nor whitelisted, run the generic command
+        self.run_generic_command(command_input, stream=True, timeout=15)
+
+    def is_registered_command(self, command_input):
+        return any(command_input.startswith(cmd) for cmd in command_registry)
+
+    def is_whitelisted_command(self, command_input):
+        return any(command_input.startswith(cmd) for cmd in self.whitelist)
 
     def get_colored_filename(self, line, filename):
         """Return the filename with appropriate color based on its properties."""
