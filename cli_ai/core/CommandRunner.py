@@ -5,6 +5,7 @@ from core.Color import Color
 from core.BaseCommandRunner import BaseCommandRunner
 from core.ChatbotHandler import ChatbotHandler
 from core.OutputFormatter import OutputFormatter
+import json
 
 # global registry hack for now
 command_registry = {}
@@ -32,13 +33,11 @@ class CommandRunner(BaseCommandRunner):
         self.chatbot_handler = ChatbotHandler()  # Initialize your ChatbotHandler here.
 
     def execute(self, command_input, is_from_ai=False):
-        # print(f"message: {command_input}")
-        # print(f"is_from_ai: {is_from_ai}")
         if command_input.startswith("h "):
             response, new_is_from_ai = self.chatbot_handler.answer_from_context(
                 command_input
             )
-            print(response)
+            print(json.loads(response)["result"]["reply"])
             # self.execute(response, is_from_ai=new_is_from_ai)
             return
 
@@ -80,15 +79,6 @@ class CommandRunner(BaseCommandRunner):
 
     def is_whitelisted_command(self, command_input):
         return any(command_input.startswith(cmd) for cmd in self.whitelist)
-
-    def get_colored_filename(self, line, filename):
-        """Return the filename with appropriate color based on its properties."""
-        if line.startswith("d"):
-            return f"{Color.BLUE}{line}{Color.END}"
-        elif filename.startswith("."):
-            return f"{Color.CYAN}{line}{Color.END}"
-        else:
-            return f"{Color.WHITE}{line}{Color.END}"
 
     @register("openvpn")
     def run_openvpn_connect(self, command):
@@ -137,7 +127,7 @@ class CommandRunner(BaseCommandRunner):
                 parts = line.split()
                 if len(parts) > 8:
                     filename = parts[-1]
-                    print(self.get_colored_filename(line, filename))
+                    print(OutputFormatter.get_colored_filename(line, filename))
         except Exception as e:
             print(f"{Color.RED}Error: {e}{Color.END}")
 

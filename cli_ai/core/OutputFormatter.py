@@ -18,6 +18,16 @@ class OutputFormatter:
     def ai_response(text):
         return f"{Color.MAGENTA}{text}{Color.END}"
 
+    @staticmethod
+    def get_colored_filename(line, filename):
+        """Return the filename with appropriate color based on its properties."""
+        if line.startswith("d"):
+            return f"{Color.BLUE}{line}{Color.END}"
+        elif filename.startswith("."):
+            return f"{Color.CYAN}{line}{Color.END}"
+        else:
+            return f"{Color.WHITE}{line}{Color.END}"
+
     def get_custom_prompt():
         username = os.getenv("USER") or os.getenv("USERNAME")
         pwd = os.getcwd()

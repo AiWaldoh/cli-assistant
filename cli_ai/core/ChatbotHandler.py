@@ -31,7 +31,11 @@ class ChatbotHandler:
             Answer:"""
 
         response = self.chatbot.ask_chatbot(
-            prompt=context_string, system_message=SYSTEM_MESSAGE_QA, history=False
+            prompt=context_string,
+            system_message=SYSTEM_MESSAGE_QA,
+            history=True,
+            original_command=command,
+            memory_template="""{{"result": {{"message_type": "normal", "reply": "{}"}}}}""",
         )
         return response, True
 

@@ -13,6 +13,7 @@ class ChatGPTBase:
         temperature=0,
         original_command=None,
         history=False,
+        memory_template=None,
     ):
         response = openai.ChatCompletion.create(
             model="gpt-3.5-turbo-16k-0613",
@@ -22,15 +23,17 @@ class ChatGPTBase:
             ],
             temperature=temperature,
         )
+        # Save the AI's response
+        res = response.choices[0].message["content"]
+        if memory_template:
+            res = memory_template.format(res)
+
         # print(response)
         if history:
             # Save the original command if provided
             if original_command:
                 self.history.append({"role": "user", "content": original_command})
 
-            # Save the AI's response
-            self.history.append(
-                {"role": "assistant", "content": response.choices[0].message["content"]}
-            )
+            self.history.append({"role": "assistant", "content": res})
 
-        return response.choices[0].message["content"]
+        return res
