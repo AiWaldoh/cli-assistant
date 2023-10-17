@@ -1,4 +1,5 @@
 import openai
+import json
 
 
 class ChatGPTBase:
@@ -26,7 +27,9 @@ class ChatGPTBase:
         # Save the AI's response
         res = response.choices[0].message["content"]
         if memory_template:
-            res = memory_template.format(res)
+            res = json.dumps(res)
+            res = memory_template.format(res[1:-1])
+            # print(res)
 
         # print(response)
         if history:

@@ -28,6 +28,7 @@ class CommandRunner(BaseCommandRunner):
             "rm",
             "touch",
             "cp",
+            "clear",
             "mv",
         ]  # Add commands you want to whitelist here.
         self.chatbot_handler = ChatbotHandler()  # Initialize your ChatbotHandler here.
@@ -37,7 +38,11 @@ class CommandRunner(BaseCommandRunner):
             response, new_is_from_ai = self.chatbot_handler.answer_from_context(
                 command_input
             )
-            print(json.loads(response)["result"]["reply"])
+            tmpres = response  # json.loads(response)["result"]["reply"]
+            # print(tmpres)
+            json_tmpres = json.loads(tmpres)
+            answer = json_tmpres["result"]["reply"]
+            print(OutputFormatter.ai_response(answer))
             # self.execute(response, is_from_ai=new_is_from_ai)
             return
 
