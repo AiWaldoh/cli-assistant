@@ -54,14 +54,15 @@ class CommandRunner(BaseCommandRunner):
         )  # Initialize your ChatbotHandler here.
 
     def execute(self, command_input, is_from_ai=False):
+        # uses the history (previous messages) to determine context
         if command_input.startswith("h "):
             response, new_is_from_ai = self.chatbot_handler.answer_from_context(
                 command_input[2:]
             )
-            tmpres = response  # json.loads(response)["result"]["reply"]
+            # tmpres = response  # json.loads(response)["result"]["reply"]
             # print(tmpres)
-            json_tmpres = json.loads(tmpres)
-            answer = json_tmpres["result"]["reply"]
+            # json_tmpres = json.loads(tmpres)
+            answer = response["content"]
             print(OutputFormatter.ai_response(answer))
             # self.execute(response, is_from_ai=new_is_from_ai)
             return

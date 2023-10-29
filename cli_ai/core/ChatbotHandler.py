@@ -40,30 +40,38 @@ class ChatbotHandler:
         for func in custom_functions:
             self.chatbot.add_custom_function(func)
 
-    def answer_from_context(self, command):
+    def answer_from_context(self, question):
         last_user_message = self.chatbot.history[-2]["content"]
-        ai_response_json = json.loads(self.chatbot.history[-1]["content"])
-        last_ai_reply = ai_response_json["result"]["reply"]
+        # print("fds")
+        # print(last_user_message)
+        # print(self.chatbot.history)
+        ai_response_json = self.chatbot.history[-1]["content"]
+        # print(ai_response_json)
+        # last_ai_reply = ai_response_json["result"]["reply"]
+        # print("fds")
+        # print(last_ai_reply)
         context_string = f"""
             You are a genius at understanding context and you will answer the Human's question based on the following context:
             Question: {last_user_message} 
-            Answer: {last_ai_reply}
+            Answer: {ai_response_json}
             
             Answer this follow up question based on the previous interaction's context:
-            Question:{command} 
+            Question:{question} 
             Answer:"""
 
         response = self.chatbot.ask_chatbot(
             prompt=context_string,
             system_message=SYSTEM_MESSAGE_QA,
             history=True,
-            original_command=command,
+            original_command=question,
             memory_template="""{{"result": {{"message_type": "normal", "reply": "{}"}}}}""",
         )
         return response, True
 
     def answer_or_execute_command(self, command):
-        response_message = self.chatbot.ask_chatbot(command, SYSTEM_MESSAGE_CONTEXT)
+        response_message = self.chatbot.ask_chatbot(
+            command, SYSTEM_MESSAGE_CONTEXT, history=True
+        )
 
         # Check if a function call was invoked
         if response_message.get("function_call"):
