@@ -87,6 +87,7 @@ class CommandRunner(BaseCommandRunner):
 
                 # Extract the command from the deserialized arguments
                 command_to_execute = arguments["command"]
+                print(command_to_execute)
                 self.execute(
                     command_to_execute, is_from_ai=True
                 )  # Recursively call with the new command
@@ -116,7 +117,7 @@ class CommandRunner(BaseCommandRunner):
     def is_whitelisted_command(self, command_input):
         return any(command_input.startswith(cmd) for cmd in self.whitelist)
 
-    @register("openvpn")
+    @register("sudo openvpn")
     def run_openvpn_connect(self, command):
         success_detected = self.check_openvpn_success(command)
         if not success_detected:

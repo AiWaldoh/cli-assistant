@@ -1,5 +1,8 @@
 import subprocess
 import time
+import subprocess
+import time
+import threading
 
 
 class BaseCommandRunner:
@@ -29,7 +32,7 @@ class BaseCommandRunner:
         start_time = time.time()
         # List to store output lines.
         lines = []
-
+        is_done = False
         try:
             # Read the command's output line by line.
             while True:
