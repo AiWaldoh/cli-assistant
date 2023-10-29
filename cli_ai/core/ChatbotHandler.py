@@ -11,11 +11,34 @@ SYSTEM_MESSAGE_CONTEXT = """
 
 SYSTEM_MESSAGE_QA = """You Answer as a QA Chatbot"""
 
+import json
+
 
 class ChatbotHandler:
-    # init constructor below
-    def __init__(self):
-        self.chatbot = ChatGPTBase(os.getenv("OPENAI_API_KEY"))
+    def __init__(self, api_key):
+        self.chatbot = ChatGPTBase(api_key)
+        self.initialize_functions()  # Initialize custom functions
+
+    def initialize_functions(self):
+        # Define the custom functions
+        custom_functions = [
+            {
+                "name": "execute_command",
+                "description": "Determine if the message is a command.",
+                "parameters": {
+                    "type": "object",
+                    "properties": {
+                        "command": {
+                            "type": "string",
+                            "description": "User input command.",
+                        }
+                    },
+                },
+            }
+        ]
+        # Add them to the base chatbot
+        for func in custom_functions:
+            self.chatbot.add_custom_function(func)
 
     def answer_from_context(self, command):
         last_user_message = self.chatbot.history[-2]["content"]
@@ -40,43 +63,16 @@ class ChatbotHandler:
         return response, True
 
     def answer_or_execute_command(self, command):
-        prompt_template = f"""
-                    Given the following user cli input that is directed to a cli AI : {command} 
-                    Determine if the message is giving directives for a command to be executed or asking for help regarding a command. If neither, respond with a helpful message.
+        response_message = self.chatbot.ask_chatbot(command, SYSTEM_MESSAGE_CONTEXT)
 
-                    Example command JSON response:
-                    {{
-                        "result": {{
-                            "message_type": "command",
-                            "explanation": "<explanation of what the command will do>"
-                            "reply": "<linux command>"
-                        }},
-                    }}
-
-                    Example question JSON response:
-                    {{
-                        "result": {{
-                            "message_type": "normal",
-                            "explanation": "<explanation of message>"
-                            "reply": "<helpful response>"
-                        }},
-                    }}
-
-                """
-
-        response = self.chatbot.ask_chatbot(
-            prompt=prompt_template,
-            system_message=SYSTEM_MESSAGE_CONTEXT,
-            original_command=command,
-            history=True,
-        )
-        try:
-            data = json.loads(response)
-            # print(data)
-            res = data["result"]
-            if res.get("message_type") == "command":
-                return data, True
+        # Check if a function call was invoked
+        if response_message.get("function_call"):
+            # This is the part where the command logic will go, as the function has been triggered
+            # You can extract relevant information from response_message["function_call"]
+            function_name = response_message["function_call"]["name"]
+            if function_name == "execute_command":
+                return response_message["function_call"], True
             else:
-                return res["reply"], False
-        except json.JSONDecodeError:
-            return response, False
+                return response_message["content"], False
+        else:
+            return response_message["content"], False

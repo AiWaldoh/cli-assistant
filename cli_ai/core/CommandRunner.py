@@ -19,6 +19,24 @@ def register(command):
     return decorator
 
 
+custom_functions = [
+    {
+        "name": "execute_command",
+        "description": "Execute a specific command based on user input",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "command": {
+                    "type": "string",
+                    "description": "The command to be executed",
+                }
+            },
+        },
+    },
+    # You can add more custom functions if needed
+]
+
+
 class CommandRunner(BaseCommandRunner):
     def __init__(self):
         super().__init__()
@@ -31,12 +49,14 @@ class CommandRunner(BaseCommandRunner):
             "clear",
             "mv",
         ]  # Add commands you want to whitelist here.
-        self.chatbot_handler = ChatbotHandler()  # Initialize your ChatbotHandler here.
+        self.chatbot_handler = ChatbotHandler(
+            os.getenv("OPENAI_API_KEY")
+        )  # Initialize your ChatbotHandler here.
 
     def execute(self, command_input, is_from_ai=False):
         if command_input.startswith("h "):
             response, new_is_from_ai = self.chatbot_handler.answer_from_context(
-                command_input
+                command_input[2:]
             )
             tmpres = response  # json.loads(response)["result"]["reply"]
             # print(tmpres)
@@ -54,14 +74,24 @@ class CommandRunner(BaseCommandRunner):
         ):
             pass
         else:
+            # If none of the above conditions are met, consult the AI
             response, is_command = self.chatbot_handler.answer_or_execute_command(
                 command_input
             )
+
             if is_command:
-                print(response["result"]["reply"])
-                self.execute(response["result"]["reply"], is_from_ai=True)
+                # print(response)
+                # Extract the command from the AI's response and execute it.
+                arguments = json.loads(response["arguments"])
+
+                # Extract the command from the deserialized arguments
+                command_to_execute = arguments["command"]
+                self.execute(
+                    command_to_execute, is_from_ai=True
+                )  # Recursively call with the new command
                 return
             else:
+                # Print AI's response if it's not a command
                 print(OutputFormatter.ai_response(response))
                 return
 
