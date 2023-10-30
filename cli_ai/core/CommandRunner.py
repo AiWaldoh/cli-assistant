@@ -6,6 +6,7 @@ from core.BaseCommandRunner import BaseCommandRunner
 from core.ChatbotHandler import ChatbotHandler
 from core.OutputFormatter import OutputFormatter
 import json
+from core.SearchResult import SearchResult
 
 # global registry hack for now
 command_registry = {}
@@ -19,22 +20,13 @@ def register(command):
     return decorator
 
 
-custom_functions = [
-    {
-        "name": "execute_command",
-        "description": "Execute a specific command based on user input",
-        "parameters": {
-            "type": "object",
-            "properties": {
-                "command": {
-                    "type": "string",
-                    "description": "The command to be executed",
-                }
-            },
-        },
-    },
-    # You can add more custom functions if needed
-]
+def contains_search_result(lst):
+    # Check if lst is a list
+    if not isinstance(lst, list):
+        return False
+
+    # Check if any item in the list is an instance of SearchResult
+    return any(isinstance(item, SearchResult) for item in lst)
 
 
 class CommandRunner(BaseCommandRunner):
@@ -93,8 +85,13 @@ class CommandRunner(BaseCommandRunner):
                 )  # Recursively call with the new command
                 return
             else:
+                if contains_search_result(response):
+                    for item in response:
+                        print(OutputFormatter.url_link(item.url))
+                        print(OutputFormatter.description(item.description))
                 # Print AI's response if it's not a command
-                print(OutputFormatter.ai_response(response))
+                else:
+                    print(OutputFormatter.ai_response(response))
                 return
 
         # Check against registered commands

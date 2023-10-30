@@ -13,6 +13,13 @@ class OutputFormatter:
     @staticmethod
     def success(text):
         return f"{Color.GREEN}{text}{Color.END}"
+    @staticmethod
+    def url_link(text):
+        return f"{Color.MAGENTA}{text}{Color.END}"
+    
+    @staticmethod
+    def description(text):
+        return f"{Color.BLUE}{text}{Color.END}"
 
     @staticmethod
     def ai_response(text):
