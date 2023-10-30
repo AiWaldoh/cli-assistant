@@ -102,11 +102,11 @@ class CommandRunner(BaseCommandRunner):
 
         # Check for whitelisted commands
         if self.is_whitelisted_command(command_input):
-            self.run_generic_command(command_input, stream=True, timeout=15)
+            self.run_generic_command(command_input, stream=True, timeout=30)
             return
 
         # If neither registered nor whitelisted, run the generic command
-        self.run_generic_command(command_input, stream=True, timeout=15)
+        self.run_generic_command(command_input, stream=True, timeout=30)
 
     def is_registered_command(self, command_input):
         return any(command_input.startswith(cmd) for cmd in command_registry)

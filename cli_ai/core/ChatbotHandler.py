@@ -102,7 +102,7 @@ class ChatbotHandler:
                     "properties": {
                         "website_url": {
                             "type": "string",
-                            "description": "The URL of the website to load.",
+                            "description": "The URL of the website to load if user specified to check a website.",
                         }
                     },
                     "required": ["website_url"],
