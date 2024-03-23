@@ -40,6 +40,15 @@ class CommandRunner(BaseCommandRunner):
             "cp",
             "clear",
             "mv",
+            "cat",
+            "ls",
+            "git",
+            "git clone",
+            "git add",
+            "git commit",
+            "git push",
+            "git pull",
+            "git status",
         ]  # Add commands you want to whitelist here.
         self.chatbot_handler = ChatbotHandler(
             os.getenv("OPENROUTER_API_KEY")
