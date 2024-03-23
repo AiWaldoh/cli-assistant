@@ -1,7 +1,5 @@
 import subprocess
 import time
-import subprocess
-import time
 import threading
 
 

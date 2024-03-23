@@ -5,7 +5,9 @@ from core.OutputFormatter import OutputFormatter
 from core.CommandRunner import CommandRunner
 import os
 from dotenv import load_dotenv
+import nltk
 
+# nltk.download("punkt")
 load_dotenv()
 
 # Define style for prompt_toolkit

@@ -1,16 +1,14 @@
-import openai
-import json
 import os
-
-
-import openai
-import json
+from openai import OpenAI
 
 
 class ChatGPTBase:
     def __init__(self, api_key):
         self.api_key = api_key
-        openai.api_key = self.api_key
+        self.client = OpenAI(
+            base_url="https://openrouter.ai/api/v1",
+            api_key=self.api_key,
+        )
         self.history = []
         self.custom_functions = []
 
@@ -32,8 +30,13 @@ class ChatGPTBase:
             {"role": "user", "content": prompt},
         ]
 
-        response = openai.ChatCompletion.create(
-            model="gpt-3.5-turbo-16k-0613",
+        response = self.client.chat.completions.create(
+            extra_headers={
+                # Optional headers for including your app in OpenRouter rankings
+                # "HTTP-Referer": f"{YOUR_SITE_URL}",
+                # "X-Title": f"{YOUR_APP_NAME}",
+            },
+            model="openai/gpt-3.5-turbo-16k-0613",
             messages=messages,
             temperature=temperature,
             functions=self.custom_functions if use_function_call else None,
@@ -41,13 +44,17 @@ class ChatGPTBase:
         )
 
         res = None
-        # print(response)
+
         # Check if a function call was invoked. Only use this for history. return response_message and
-        if response.choices[0].message.get("function_call"):
-            res = response.choices[0].message.get("function_call")
+        if (
+            hasattr(response.choices[0].message, "function_call")
+            and response.choices[0].message.function_call is not None
+        ):
+            # print("function call!")
+            res = response.choices[0].message.function_call
         else:
-            res = response.choices[0].message["content"]
-        # print(res)
+            res = response.choices[0].message.content
+
         # History management
         # Apply memory template if provided
         if memory_template and isinstance(res, str):
@@ -63,6 +70,5 @@ class ChatGPTBase:
                 }
             )
             self.history.append({"role": "assistant", "content": res})
-        return response.choices[0].message
 
-        return response_message
+        return response.choices[0].message

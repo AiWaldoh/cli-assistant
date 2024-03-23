@@ -42,7 +42,7 @@ class CommandRunner(BaseCommandRunner):
             "mv",
         ]  # Add commands you want to whitelist here.
         self.chatbot_handler = ChatbotHandler(
-            os.getenv("OPENAI_API_KEY")
+            os.getenv("OPENROUTER_API_KEY")
         )  # Initialize your ChatbotHandler here.
 
     def execute(self, command_input, is_from_ai=False):
@@ -75,11 +75,13 @@ class CommandRunner(BaseCommandRunner):
             if is_command:
                 # print(response)
                 # Extract the command from the AI's response and execute it.
-                arguments = json.loads(response["arguments"])
+                arguments = json.loads(response.arguments)
 
                 # Extract the command from the deserialized arguments
                 command_to_execute = arguments["command"]
-                print(command_to_execute)
+                print(
+                    f"Running command {command_to_execute}"
+                )  # Print the command_to_execute)
                 self.execute(
                     command_to_execute, is_from_ai=True
                 )  # Recursively call with the new command

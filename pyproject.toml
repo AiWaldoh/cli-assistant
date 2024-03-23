@@ -7,7 +7,7 @@ authors = ["Your Name <you@example.com>"]
 [tool.poetry.dependencies]
 python = "^3.10"
 python-dotenv = "^1.0.0"
-openai = "^0.28.1"
+openai = "^1.14.1"
 prompt-toolkit = "^3.0.39"
 curl-cffi = "^0.5.9"
 beautifulsoup4 = "^4.12.2"

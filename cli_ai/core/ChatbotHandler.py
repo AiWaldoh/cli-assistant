@@ -69,7 +69,7 @@ class ChatbotHandler:
         custom_functions = [
             {
                 "name": "execute_command",
-                "description": "Determine if the message is a command.",
+                "description": "Determine if the message is asking to run a command.",
                 "parameters": {
                     "type": "object",
                     "properties": {
@@ -146,14 +146,19 @@ class ChatbotHandler:
             command, SYSTEM_MESSAGE_CONTEXT, history=True
         )
         searcher = SearchResult("title", "url", "description")
+        # print(response_message)
         # Check if a function call was invoked
-        if response_message.get("function_call"):
+        if (
+            hasattr(response_message, "function_call")
+            and response_message.function_call is not None
+        ):
+            # print(f"here we go {response_message}")
             # This is the part where the command logic will go, as the function has been triggered
             # You can extract relevant information from response_message["function_call"]
-            function_name = response_message["function_call"]["name"]
-
+            function_name = response_message.function_call.name
+            # print(f"Function name: {function_name}")
             if function_name == "search_google":
-                res = json.loads(response_message["function_call"]["arguments"])
+                res = json.loads(response_message.function_call.arguments)
                 search_query = res["search_query"]
                 print("Searching for:  " + search_query)
                 results = fetch_google_search_results(search_query)
@@ -165,17 +170,19 @@ class ChatbotHandler:
                 # result.display()
                 return results, False
             elif function_name == "load_website":
-                print("Scraping website...")
-                arguments = json.loads(response_message["function_call"]["arguments"])
+                # print("Scraping website...")
+                # print("I am broken from old sdk")
+                arguments = json.loads(response_message.function_call.arguments)
                 # print(arguments)
                 website_url = arguments["website_url"]
-                print(website_url)
+                # print(website_url)
                 res = searcher.fetch_and_parse_article(website_url)
                 # print(res)
-                return res, False
+                return res["article_full_text"], False
             elif function_name == "execute_command":
-                return response_message["function_call"], True
+                return response_message.function_call, True
             else:
-                return response_message["content"], False
+                # print()
+                return response_message.content, False
         else:
-            return response_message["content"], False
+            return response_message.content, False
